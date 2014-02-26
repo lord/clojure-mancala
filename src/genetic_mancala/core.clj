@@ -51,3 +51,26 @@
       [(+ (nth board 06) (reduce + p0-houses))
        (+ (nth board 13) (reduce + p1-houses))]
       false)))
+
+(defn get-move
+  "Gets a move from a bot based on the current state of the board"
+  [state bot]
+  (eval-bot (:board state) bot))
+
+(defn eval-bot
+  "Evaluate a statement from a bot"
+  [board bot]
+  (if (number? bot)
+    bot
+    (condp = (first bot)
+      :add (+ (eval-bot board (nth bot 1)) (eval-bot board (nth bot 2)))
+      :sub (- (eval-bot board (nth bot 1)) (eval-bot board (nth bot 2)))
+      :val (nth board (eval-bot board (nth bot 1)))
+      (first bot)
+      )))
+
+(get-move {:board [3 3 3 12 3 3 3 3 3 3 3 3 3 3 3] :turn 0} [:sub 3 [:val 3]])
+
+; [:add 1 [:add 2]]
+
+
