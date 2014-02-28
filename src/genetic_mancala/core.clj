@@ -24,12 +24,12 @@
                       house-seeds))
                   (range 14)
                   board)
-     :turn (if (= (mod (+ house seeds offset) 6) 0)
+     :turn (if (and (= (mod (+ house seeds offset) 6) 0) (not= (+ house seeds offset) 0))
              turn
              (mod (+ turn 1) 2))}))
 
 
-(make-move {:board [3 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 1} 3)
+(make-move {:board [0 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 0} 0)
 
 (defn squares-empty?
   "Checks if all the elements in squares are equal to 0"
@@ -69,24 +69,31 @@
 (defn get-move
   "Gets a move from a bot based on the current state of the board"
   [state bot]
-  (eval-bot (:board state) bot))
+  (mod (eval-bot (:board state) bot) 6))
 
 (get-move {:board [3 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 0} [:rand])
 
-(get-move {:board [3 3 3 12 3 3 3 3 3 3 3 3 3 3 3] :turn 0} [:sub 3 [:val 3]])
+(get-move {:board [3 3 3 12 3 3 3 3 3 3 3 3 3 3 3] :turn 0} [:sub 6 [:val 3]])
 
 (defn play-game
   "Plays two bots against each other"
   [bot0 bot1]
-  (loop [state {:board [3 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 0} turn-count 0]
+  (loop [state {:board [3 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 0} iterations 0]
+  ; (loop [state {:board [1 0 0 0 0 0 16 1 0 0 0 0 0 16] :turn 0} iterations 0]
     (let [final-scores (get-final-scores state)
           turn (state :turn)
           current-bot (nth [bot0 bot1] turn)]
-      (if (and (= final-scores false) (> 100000 turn-count))
-        (recur (make-move state (get-move state current-bot)) (inc turn-count))
-        ; (println (make-move state (get-move state current-bot)))
+      (if (and (= final-scores false) (< iterations 1000000))
+        (recur (make-move state (get-move state current-bot)) (inc iterations))
+        ; state))))
         final-scores))))
-        ; final-scores))))
 
+(defn calc-fitness
+  "Calculate a bot's fitness"
+  [bot]
+  (+ (nth (play-game bot [:rand]) 0)
+     (nth (play-game [:rand] bot) 1)))
 
-(play-game [:rand] [:rand])
+(calc-fitness [0])
+
+(play-game [0] [:rand])
