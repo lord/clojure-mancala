@@ -1,5 +1,11 @@
 (ns genetic-mancala.core)
 
+(defn get-random-move
+  "Gets a random move for the current player, making sure to not choose a empty square"
+  [state]
+  (let [{:keys [board move]} state]
+    ()))
+
 (defn make-move
   "Returns a new board state based on a house being moved"
   [state move]
@@ -95,5 +101,3 @@
      (nth (play-game [:rand] bot) 1)))
 
 (calc-fitness [0])
-
-(play-game [0] [:rand])
