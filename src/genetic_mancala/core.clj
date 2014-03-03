@@ -4,14 +4,19 @@
   "Gets a random move for the current player, making sure to not choose a empty square"
   [state]
   (let [{:keys [board move]} state]
-    ()))
+    (loop [recurs 0]
+      (let [number (+ (rand-int 6) (if (= move 1) 7 0))]
+        (if (= (nth board number) 0)
+          (if (< recurs 1000) (recur (inc recurs)) (throw (Exception. "Couldn't find move")))
+          number)))))
 
 (defn make-move
   "Returns a new board state based on a house being moved"
   [state move]
   (let [board (:board state)
         turn  (:turn state)
-        house (+ (mod move 6) (if (= turn 1) 7 0))
+        attempted-move (+ (mod move 6) (if (= turn 1) 7 0))
+        house (if (= (nth board attempted-move) 0) (get-random-move state) attempted-move)
         seeds (nth board house)
         skip (if (= turn 1) 6 13)
         offset (if (<= house skip (+ house seeds)) 1 0) ]
@@ -84,7 +89,7 @@
 (defn play-game
   "Plays two bots against each other"
   [bot0 bot1]
-  (loop [state {:board [3 3 3 3 3 3 0 3 3 3 3 3 3 0] :turn 0} iterations 0]
+  (loop [state {:board [6 6 6 6 6 6 0 6 6 6 6 6 6 0] :turn 0} iterations 0]
   ; (loop [state {:board [1 0 0 0 0 0 16 1 0 0 0 0 0 16] :turn 0} iterations 0]
     (let [final-scores (get-final-scores state)
           turn (state :turn)
@@ -95,9 +100,9 @@
         final-scores))))
 
 (defn calc-fitness
-  "Calculate a bot's fitness"
-  [bot]
-  (+ (nth (play-game bot [:rand]) 0)
-     (nth (play-game [:rand] bot) 1)))
+  "Calculate bot1's fitness vs. bot2"
+  [bot1 bot2]
+  (+ (nth (play-game bot1 bot2) 0)
+     (nth (play-game bot2 bot1) 1)))
 
-(calc-fitness [0])
+(calc-fitness [:val 0] [:val 5])
